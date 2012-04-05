@@ -1,29 +1,30 @@
 #!/bin/bash
+source diva_profile
 echo //////////////////////////////////////////////////
 echo                Mesh generation
 echo //////////////////////////////////////////////////
 echo ' '
-if [ -f ./input/coast.cont ] 
+if [ -f  ] 
 then
-cp ./input/coast.cont ./meshgenwork/fort.10
+cp ${divacontourfile} ${DIVAMESHGENWORKDIR}fort.10
 else
 echo Need to provide coast.cont in ./input !
 fi
 isdens=0
-if [ -f ./input/coast.cont.dens ] 
+if [ -f ${DIVAINPUTDIR}coast.cont.dens ] 
 then
 echo There is a density file for the mesh
-cp -v ./input/coast.cont.dens ./meshgenwork/fort.12
+cp -v ${DIVAINPUTDIR}coast.cont.dens ${DIVAMESHGENWORKDIR}'fort.12'
 isdens=1
 fi
 ##echo $isdens
-if [ -f ./input/param.par ] 
+if [ -f ${divaparamfile} ] 
 then
 echo Reading parameters
 else
 echo Need to provide param.par in ./input/
 fi
-Filepar=./input/param.par
+Filepar=${DIVAINPUTDIR}'param.par'
 {
 read linecomment
 read lc
@@ -63,18 +64,21 @@ read varbak
 #echo 5 >> ./meshgenwork/fort.11
 #exec 11>&-
 
-rm -f fort.11
-echo $isdens $lc | ../bin/lcelem.a
-mv fort.11 ./meshgenwork/fort.11
-echo 1.5 >> ./meshgenwork/fort.11
-echo 5 >> ./meshgenwork/fort.11
+##rm -f fort.11
+
+echo $isdens > ${DIVAMESHGENWORKDIR}fort.11
+echo $(echo $lc | awk '{print ($lc/5)}') >> ${DIVAMESHGENWORKDIR}fort.11
+
+##echo $isdens $lc | ${DIVABINDIR}lcelem.a
+##cp fort.11 ${DIVAMESHGENWORKDIR}fort.11
+echo 1.5 >> ${DIVAMESHGENWORKDIR}fort.11
+echo 5 >> ${DIVAMESHGENWORKDIR}fort.11
 #exec 11>&-
 #generation of the mesh
-cd ./meshgenwork
-if [ -f ../output/diva.log ] ; then
- cp -f ../output/diva.log .
-fi
-echo $icoordchange | ../../bin/generopt.a >> diva.log
+cd ${DIVAMESHGENWORKDIR}
+echo $icoordchange | ${DIVABINDIR}generopt.a >> ${divalogfile}
+cd ${DIVADIR}
+
 if [ $? -ne 0 ];then
 echo ' '
 echo --------------------------------------------
@@ -82,15 +86,14 @@ echo A problem was encountered during execution !
 echo          divamesh      generopt.a
 echo Check execution track
 echo --------------------------------------------
-echo ' ' >> diva.log
-echo -------------------------------------------- >> diva.log
-echo A problem was encountered during execution ! >> diva.log
-echo          divamesh      generopt.a  >> diva.log
+echo ' ' >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
+echo A problem was encountered during execution ! >> ${divalogfile}
+echo          divamesh      generopt.a  >> ${divalogfile}
 echo Check execution track >> diva.log
-echo -------------------------------------------- >> diva.log
+echo -------------------------------------------- >> ${divalogfile}
 fi
- cp -f diva.log ../output/.
-File23=./fort.23
+File23=${DIVAMESHGENWORKDIR}fort.23
 {
 read nnt1
 read nnint
@@ -100,14 +103,11 @@ read nelt
 echo ' '
 echo Copying output files for visualisation 
 echo in directory ./output/meshvisu/ 
-cp fort.10 ../output/meshvisu/
-cp fort.22 ../output/meshvisu/
-cp fort.23 ../output/meshvisu/
+cp ${DIVAMESHGENWORKDIR}fort.10 ${DIVAMESHGENWORKDIR}fort.22 ${DIVAMESHGENWORKDIR}fort.23 ${DIVAMESHVISUDIR}
  
 #exec 23<>fort.23
 #read  nnt1 nnint nelt <&3
 #exec 23>&-
-cd ..
 echo ' '
 echo ---------------
 echo Mesh is created

@@ -20,7 +20,7 @@ echo Quality control
 echo ===============
 iqc=1
 fi
-Filepar=./input/param.par
+Filepar=${divaparamfile}
 {
 read linecomment
 read lc
@@ -54,13 +54,13 @@ then
 cp ./input/valatxy.coord ./divawork/fort.79
 fi
 xi=1
-cd ./meshgenwork
-File23=./fort.23
+##cd ./meshgenwork
+File23=${DIVAMESHGENWORKDIR}fort.23
 #output of info for mesh visualisation with meshvisu.m
 #echo Copying output files for mesh visualisation in ./output/meshvisu/
-cp  ../output/meshvisu/fort.10 .
-cp  ../output/meshvisu/fort.22 .
-cp  ../output/meshvisu/fort.23 .
+
+cp  ${DIVAMESHVISUDIR}fort.10 ${DIVAMESHVISUDIR} fort.22 ${DIVAMESHVISUDIR}fort.23 ${DIVAMESHGENWORKDIR}
+
 echo ' '
 {
 read nnt1
@@ -68,13 +68,13 @@ read nnint
 read nelt
 } < $File23
  
-cp fort.22 ../divawork/fort.11
-cd ../divawork
+cp ${DIVAMESHGENWORKDIR}fort.22 ${DIVAWORKDIR}fort.11
+##cd ../divawork
 # try to estimate memory allocation....
 # 
 NREA=0
 NINT=0
-NDATA=$(cat ../input/data.dat | wc -l)
+NDATA=$(cat ${divadatafile} | wc -l)
 echo 'Number of data points:' ${NDATA}
 echo ' '
 let NREA=$NREA+4*$NDATA
@@ -115,14 +115,14 @@ let NREA=$NREA+2*$nnt1
 let NINT=$NINT+$nelt*100
 #
 itcs=0
-if [ -f ../input/constraint.dat ]
+if [ -f ${DIVAINPUTDIR}constraint.dat ]
 then
 let itcs=$itcs+1
 echo Advection requested
-cat ../input/constraint.dat > ./fort.49
-cp ../input/UVinfo.dat ./fort.93
-cp ../input/Uvel.dat ./fort.91
-cp ../input/Vvel.dat ./fort.92
+cat ${DIVAINPUTDIR}constraint.dat > ${DIVAWORKDIR}fort.49
+cp ${DIVAINPUTDIR}UVinfo.dat ${DIVAWORKDIR}fort.93
+cp ${DIVAINPUTDIR}Uvel.dat ${DIVAWORKDIR}fort.91
+cp ${DIVAINPUTDIR}Vvel.dat ${DIVAWORKDIR}fort.92
 let NREA=$NREA+2*$nnt1
 {
 read aaaaa
@@ -131,17 +131,17 @@ read ccccc
 read ddddd
 read nxuuu
 read nyuuu
-} < ../input/UVinfo.dat
+} < ${DIVAINPUTDIR}UVinfo.dat
 let NREA=$NREA+$nxuuu*$nyuuu
 let NREA=$NREA+2*$nnt1
 let NREA=$NREA+1
 fi
-if [ -f ../input/RL.dat ]
+if [ -f ${DIVAINPUTDIR}RL.dat ]
 then
 let itcs=$itcs+2
 echo Variable L requested
-cp ../input/RL.dat ./fort.94
-cp ../input/RLinfo.dat ./fort.95
+cp ${DIVAINPUTDIR}RL.dat ${DIVAWORKDIR}fort.94
+cp ${DIVAINPUTDIR}RLinfo.dat ${DIVAWORKDIR}fort.95
 let NREA=$NREA+$nnt1
 {
 read aaaaa
@@ -150,14 +150,15 @@ read ccccc
 read ddddd
 read nxlll
 read nylll
-} < ../input/RLinfo.dat
+} < ${DIVAINPUTDIR}RLinfo.dat
 let NREA=$NREA+$nxlll*$nylll
 let NREA=$NREA+$nnt1
 let NREA=$NREA+1
 fi
-if [ -f ../output/diva.log ] ; then
- cp  -f ../output/diva.log .
-fi
+
+##if [ -f ../output/diva.log ] ; then
+## cp  -f ../output/diva.log .
+##fi
 
 #creation of file fort.13
 #
@@ -172,13 +173,13 @@ fi
 #echo $valex >> ./fort.13
 #../../bin/griddef.a >> diva.log
 
-echo $(echo $xori $dx | awk '{print ($1-$2)}') >  ./fort.13
-echo $(echo $yori $dy | awk '{print ($1-$2)}') >> ./fort.13
-echo $dx >> ./fort.13
-echo $dy >> ./fort.13
-echo $nx >> ./fort.13
-echo $ny >> ./fort.13
-echo $valex >> ./fort.13
+echo $(echo $xori $dx | awk '{print ($1-$2)}') >  ${DIVAWORKDIR}fort.13
+echo $(echo $yori $dy | awk '{print ($1-$2)}') >> ${DIVAWORKDIR}fort.13
+echo $dx >> ${DIVAWORKDIR}fort.13
+echo $dy >> ${DIVAWORKDIR}fort.13
+echo $nx >> ${DIVAWORKDIR}fort.13
+echo $ny >> ${DIVAWORKDIR}fort.13
+echo $valex >> ${DIVAWORKDIR}fort.13
 
 
 if [ $? -ne 0 ];then
@@ -188,16 +189,16 @@ echo A problem was encountered during execution !
 echo       divacalc:    griddef.a
 echo Check execution track
 echo --------------------------------------------
-echo ' ' >> diva.log
-echo -------------------------------------------- >> diva.log
-echo A problem was encountered during execution ! >> diva.log
-echo       divacalc:    griddef.a  >> diva.log
-echo Check execution track >> diva.log
-echo -------------------------------------------- >> diva.log
+echo ' ' >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
+echo A problem was encountered during execution ! >> ${divalogfile}
+echo       divacalc:    griddef.a  >> ${divalogfile}
+echo Check execution track >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
 fi
 ##echo $lc $xi | ../../bin/alpha.a >> diva.log
-echo $(echo $lc | awk '{print (1/($1**4))}') > fort.12
-echo $(echo $lc $xi | awk '{print (2*$2($1**2))}') >> fort.12
+echo $(echo $lc | awk '{print (1/($1**4))}') > ${DIVAWORKDIR}fort.12
+echo $(echo $lc $xi | awk '{print (2*$2($1**2))}') >> ${DIVAWORKDIR}fort.12
 
 
 if [ $? -ne 0 ];then
@@ -207,28 +208,28 @@ echo A problem was encountered during execution !
 echo       divacalc:    alpha.a
 echo Check execution track
 echo --------------------------------------------
-echo ' ' >> diva.log
-echo -------------------------------------------- >> diva.log
-echo A problem was encountered during execution ! >> diva.log
-echo       divacalc:  alpha.a  >> diva.log
-echo Check execution track >> diva.log
-echo -------------------------------------------- >> diva.log
+echo ' ' >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
+echo A problem was encountered during execution ! >> ${divalogfile}
+echo       divacalc:  alpha.a  >> ${divalogfile}
+echo Check execution track >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
 fi
 if [ "$ireg" == "3" ]
 then
-aaaref=$(head -1 fort.12)
-echo 0 > newalpha
+aaaref=$(head -1 ${DIVAWORKDIR}fort.12)
+echo 0 > ${DIVAWORKDIR}newalpha
 # Test, not really zero, but small
 
 ##echo  1.E-6 $aaaref | ../../bin/multiply.a > newalpha
-echo $(echo $aaaref | awk '{print ($1*1.E-6)}') >  newalpha
+echo $(echo $aaaref | awk '{print ($1*1.E-6)}') > ${DIVAWORKDIR}newalpha
 
-tail -1 fort.12 >> newalpha
-mv newalpha fort.12
+tail -1 ${DIVAWORKDIR}fort.12 >> ${DIVAWORKDIR}newalpha
+mv ${DIVAWORKDIR}newalpha ${DIVAWORKDIR}fort.12
 let ireg=1
 fi
-echo $varbak > ./fort.15
-cd ..
+echo $varbak > ${DIVAWORKDIR}fort.15
+##cd ..
 if [ "$iqc" != "1" ]
 then
 if [ "$ispec" -lt "0" ] 
@@ -256,40 +257,40 @@ fi
 fi
 fi
 fi
-if [ -f ./input/data.dat ] 
+if [ -f ${divainputfile} ] 
 then 
-cp ./input/data.dat ./divawork/fort.44
+cp ${divainputfile} ${DIVAWORKDIR}fort.44
 else
 echo Need to provide data.dat in ./input !
 ##ls -l ./input
 ##pwd
 fi
-cd ./divawork
-echo coord 1 > ./fort.10
-echo $icoordchange >> ./fort.10
-echo mathpr 1 >> ./fort.10
-echo 2 >> ./fort.10
-echo 0 >> ./fort.10
-echo 2 >> ./fort.10
-echo topolo 1 >> ./fort.10
-echo $nnt1 >> ./fort.10
-echo $nnint >> ./fort.10
-echo $nelt >> ./fort.10
-echo datapr 1 >> ./fort.10
-echo $ireg >> ./fort.10
+##cd ./divawork
+echo coord 1 > ${DIVAWORKDIR}fort.10
+echo $icoordchange >> ${DIVAWORKDIR}fort.10
+echo mathpr 1 >> ${DIVAWORKDIR}fort.10
+echo 2 >> ${DIVAWORKDIR}fort.10
+echo 0 >> ${DIVAWORKDIR}fort.10
+echo 2 >> ${DIVAWORKDIR}fort.10
+echo topolo 1 >> ${DIVAWORKDIR}fort.10
+echo $nnt1 >> ${DIVAWORKDIR}fort.10
+echo $nnint >> ${DIVAWORKDIR}fort.10
+echo $nelt >> ${DIVAWORKDIR}fort.10
+echo datapr 1 >> ${DIVAWORKDIR}fort.10
+echo $ireg >> ${DIVAWORKDIR}fort.10
 #JMB
 if [ "$itcs" != "0" ] 
 then 
 echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 echo  Module constraint activated
 echo $itcs
-echo constr 1 >> ./fort.10
-echo $itcs >> ./fort.10
+echo constr 1 >> ${DIVAWORKDIR}fort.10
+echo $itcs >> ${DIVAWORKDIR}fort.10
 fi
-echo solver 1 >> ./fort.10
-echo 0 >> ./fort.10
-echo stores 1 >> ./fort.10
-echo 3 >> ./fort.10
+echo solver 1 >> ${DIVAWORKDIR}fort.10
+echo 0 >> ${DIVAWORKDIR}fort.10
+echo stores 1 >> ${DIVAWORKDIR}fort.10
+echo 3 >> ${DIVAWORKDIR}fort.10
 echo VARBAK: $varbak
 if [ "$iqc" != "1" ]
 then
@@ -299,27 +300,27 @@ if [ "$ispec" != "0" ]
 then
 	echo ' '
 echo Errors will be calculated
-echo esterr 1 >> ./fort.10
-echo $ispec >> ./fort.10
+echo esterr 1 >> ${DIVAWORKDIR}fort.10
+echo $ispec >> ${DIVAWORKDIR}fort.10
 fi
 fi
 #echo $ >> ./fort.10
-echo gcvfac 1 >> ./fort.10
-echo 5 >> ./fort.10
-echo stopex >> ./fort.10
+echo gcvfac 1 >> ${DIVAWORKDIR}fort.10
+echo 5 >> ${DIVAWORKDIR}fort.10
+echo stopex >> ${DIVAWORKDIR}fort.10
 else
 #QC
-echo dataqc 1 >> ./fort.10
-echo stopex >>./fort.10
+echo dataqc 1 >> ${DIVAWORKDIR}fort.10
+echo stopex >> ${DIVAWORKDIR}fort.10
 fi
 #creation of file fort.20
-nbccol=$(head -n 1 ./fort.44 | wc -w)
+nbccol=$(head -n 1 ${DIVAWORKDIR}fort.44 | wc -w)
 #echo $lc $snr $nbccol $xi | ../../bin/calcmu.a >> diva.log
 # New version
-multconst=$(echo $lc $snr $xi | ../../bin/calcmuc.a)
+multconst=$(echo $lc $snr $xi | ${DIVABINDIR}calcmuc.a)
 multvar=$(echo $multconst | awk '{print 1*$1}')
 #echo multiply weight $multvar $multconst so what
-awk -v multconst=$multvar '{ if (NF>2) {if ($4 > "") {$4=$4*multconst} else {$4=multconst}}; {print $1,$2,$3,$4}}' fort.44 > fort.20
+awk -v multconst=$multvar '{ if (NF>2) {if ($4 > "") {$4=$4*multconst} else {$4=multconst}}; {print $1,$2,$3,$4}}' ${DIVAWORKDIR}fort.44 > ${DIVAWORKDIR}fort.20
 if [ $? -ne 0 ];then
 echo ' '
 echo --------------------------------------------
@@ -327,15 +328,15 @@ echo A problem was encountered during execution !
 echo       divacalc:  calmu.a
 echo Check execution track
 echo --------------------------------------------
-echo ' ' >> diva.log
-echo -------------------------------------------- >> diva.log
-echo A problem was encountered during execution ! >> diva.log
-echo       divacalc:   calmu.a  >> diva.log
-echo Check execution track >> diva.log
-echo -------------------------------------------- >> diva.log
+echo ' ' >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
+echo A problem was encountered during execution ! >> ${divalogfile}
+echo       divacalc:   calmu.a  >> ${divalogfile}
+echo Check execution track >> ${divalogfile}
+echo -------------------------------------------- >> ${divalogfile}
 fi
- cp -f diva.log ../output/.
-NDATAB=$(cat ./fort.20 | wc -l)
+# cp -f diva.log ../output/.
+NDATAB=$(cat ${DIVAWORKDIR}fort.20 | wc -l)
 if [ "$NDATAB" -lt "$NDATA" ]
 then
 echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -351,16 +352,16 @@ fi
 if [ "$1" == "-pfsum" ]
 then
 echo Summing covariances
-cd ..
+##cd ..
 . ./dvcovariancesum
 exit
 fi
-if [ -f ../output/diva.log ] ; then
- cp  -f ../output/diva.log .
-fi
+##if [ -f ../output/diva.log ] ; then
+## cp  -f ../output/diva.log .
+##fi
 ##echo 'REMOVE FORT.35 and FORT.43'
-rm -f fort.43
-rm -f fort.35
+rm -f ${DIVAWORKDIR}fort.43
+rm -f ${DIVAWORKDIR}fort.35
 #execute diva
 echo $NINT $NREA | ../../bin/diva.a >> diva.log
 dataonmesh=0
